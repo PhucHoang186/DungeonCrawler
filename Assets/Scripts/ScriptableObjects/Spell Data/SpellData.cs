@@ -1,0 +1,33 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using EntityObject;
+using Managers;
+using UnityEngine;
+
+namespace Data
+{
+    public abstract class SpellData : ScriptableObject
+    {
+        [Header("Info")]
+        public Sprite SpellIcon;
+        public string SpellDescription = "Some useful info";
+        [Header("Value")]
+        public bool NeedTarget = true;
+        public int CastRange;
+        public int ModifyRange;
+        public ModifierData ModifyData;
+        public ModifierData CostData;
+
+        public abstract void StartCastSpell(BattleManager battleManager);
+        public abstract void CastingSpell(BattleManager battleManager);
+        public abstract void ExcuteSpell(BattleManager battleManager);
+    }
+
+    [Serializable]
+    public class ModifierData
+    {
+        public ModifyCategory ModifyCategory;
+        public float ModifyValue;
+    }
+}
