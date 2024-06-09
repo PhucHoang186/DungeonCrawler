@@ -40,16 +40,6 @@ namespace Map
             }
         }
 
-        public void ResetRange(List<Node> neighborNodes, highlightType highlightType, bool recordThisState = true, bool revertLastState = false)
-        {
-            for (int i = 0; i < neighborNodes.Count; i++)
-            {
-                MoveableNode moveableNode = neighborNodes[i] as MoveableNode;
-                if (moveableNode)
-                    moveableNode.ToggleHighlight(false, highlightType, recordThisState, revertLastState);
-            }
-        }
-
         public void VisualizeModifyPath(Node startNode, Node endNode)
         {
             modifyIndicator.gameObject.SetActive(true);
@@ -57,7 +47,8 @@ namespace Map
 
             float stepAmount = 1f / step;
             modifyVisualize.positionCount = step;
-            Vector3 crossPorduct = Vector3.Cross(endNode.transform.position - startNode.transform.position, Vector3.up).normalized * 3f;
+            float distance = Vector3.Distance(startNode.transform.position, endNode.transform.position);
+            Vector3 crossPorduct = Vector3.Cross(endNode.transform.position - startNode.transform.position, Vector3.up).normalized * distance;
             for (int i = 0; i < step; i++)
             {
                 Vector3 pos = GameHelper.ShowBezierCurve(startNode.transform.position, startNode.transform.position + crossPorduct,
@@ -70,6 +61,16 @@ namespace Map
         {
             modifyVisualize.positionCount = 0;
             modifyIndicator.gameObject.SetActive(false);
+        }
+
+        public void ClearRange(List<Node> neighborNodes, highlightType highlightType, bool recordThisState = true, bool revertLastState = false)
+        {
+            for (int i = 0; i < neighborNodes.Count; i++)
+            {
+                MoveableNode moveableNode = neighborNodes[i] as MoveableNode;
+                if (moveableNode)
+                    moveableNode.ToggleHighlight(false, highlightType, recordThisState, revertLastState);
+            }
         }
 
         public void ClearPath()

@@ -31,7 +31,7 @@ public enum CharacterClass
 
 public enum CamType
 {
-    Battle_View, Character_View,
+    Battle_View, Character_View, Full_View
 }
 
 public enum highlightType

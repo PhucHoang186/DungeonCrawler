@@ -15,8 +15,8 @@ MonoBehaviour:
   SpellIcon: {fileID: 21300000, guid: 2b1603372ddf5bc48ace841bdf00d379, type: 3}
   SpellDescription: Some useful info
   NeedTarget: 1
-  CastRange: 3
-  ModifyRange: 1
+  CastRange: 1
+  ModifyRange: 0
   ModifyData:
     ModifyCategory: {fileID: 11400000, guid: 34d7b8bf9dd72a64c8a78b8aec1b197e, type: 2}
     ModifyValue: 1

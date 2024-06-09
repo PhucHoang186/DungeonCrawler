@@ -107,14 +107,14 @@ Material:
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
-    - _Distance: 2.44
+    - _Distance: 5
     - _DstBlend: 0
     - _EnableExternalAlpha: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _Height: 0.55
+    - _Height: 0.28
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -128,7 +128,7 @@ Material:
     - _Speed: 2.39
     - _SrcBlend: 1
     - _Surface: 0
-    - _Width: 0.7
+    - _Width: 0.8
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

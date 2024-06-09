@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Managers
@@ -67,6 +68,11 @@ namespace Managers
                     cam.SetPriority(10);
                 }
             }
+        }
+
+        public void ShakeCam(float duration, float amplitude, float frequency)
+        {
+            currentCam.ShakeCam(duration, amplitude, frequency);
         }
     }
 }

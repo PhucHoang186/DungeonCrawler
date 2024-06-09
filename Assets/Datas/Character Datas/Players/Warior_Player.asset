@@ -14,4 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EntityIcon: {fileID: 21300000, guid: f4323efd7b6a6004d8ece79e1846ab23, type: 3}
   EntityType: 0
+  MaxHealth: 10
+  MaxStamina: 12
+  MaxMana: 0
   CharaterClass: 0
+  EquippedSpellList: []
+  LearnedSpellList: []

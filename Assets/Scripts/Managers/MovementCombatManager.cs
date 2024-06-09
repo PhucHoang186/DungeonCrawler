@@ -97,7 +97,7 @@ public class MovementCombatManager : MonoBehaviour
 
     public void ShowCastingRange(Node startNode, int affectRange)
     {
-        castNodes = gridManager.GetNeighborNodesWithStep(startNode, affectRange);
+        castNodes = gridManager.GetNeighborNodesWithStep(startNode, affectRange, getEmptyOnly: false);
         VisualizeRange(castNodes, highlightType.ActionRange);
     }
 
@@ -107,7 +107,7 @@ public class MovementCombatManager : MonoBehaviour
             return null;
 
         ResetNode(modifyNode: true, revertLastState: true);
-        modifyNodes = gridManager.GetNeighborNodesWithStep(startNode, modifyRange);
+        modifyNodes = gridManager.GetNeighborNodesWithStep(startNode, modifyRange, getEmptyOnly: false);
         VisualizeRange(modifyNodes, highlightType.Action, false);
         VisualizeModifyPath(currentPlayerNode, startNode);
 
@@ -192,7 +192,7 @@ public class MovementCombatManager : MonoBehaviour
         {
             Node newNode = path[0];
             path.RemoveAt(0);
-            float moveTime = entity.MoveToNode(newNode) + 0.2f;
+            float moveTime = (entity as CharacterEntity).MoveToNode(newNode) + 0.2f;
             yield return new WaitForSeconds(moveTime);
             if (path.Count == 0)
             {
@@ -208,12 +208,12 @@ public class MovementCombatManager : MonoBehaviour
     public void ResetNode(bool moveNode = false, bool castNode = false, bool modifyNode = false, bool recordThisState = true, bool revertLastState = false)
     {
         if (moveNode)
-            visualization.ResetRange(moveNodes, highlightType.Move, recordThisState, revertLastState);
+            visualization.ClearRange(moveNodes, highlightType.Move, recordThisState, revertLastState);
 
         if (castNode)
-            visualization.ResetRange(castNodes, highlightType.ActionRange, recordThisState, revertLastState);
+            visualization.ClearRange(castNodes, highlightType.ActionRange, recordThisState, revertLastState);
 
         if (modifyNode)
-            visualization.ResetRange(modifyNodes, highlightType.Action, recordThisState, revertLastState);
+            visualization.ClearRange(modifyNodes, highlightType.Action, recordThisState, revertLastState);
     }
 }

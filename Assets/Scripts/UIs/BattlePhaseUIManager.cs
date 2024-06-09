@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Data;
 using EntityObject;
+using Managers;
 using UnityEngine;
 
 namespace GameUI
@@ -14,6 +15,9 @@ namespace GameUI
         [SerializeField] Transform turnHolder;
         [SerializeField] ActionPanelUI actionPanel;
         [SerializeField] ActionCardPanel actionCardPanel;
+        [SerializeField] BattleUIEffect battleEffect;
+        [SerializeField] float shakeAmplitude;
+        [SerializeField] float shakeFrequency;
 
         private List<TurnIconDisplay> turnIconDisplays = new();
         private Action<ActionType> onChangeActionTypeCb;
@@ -98,6 +102,12 @@ namespace GameUI
         public void ResetExecutedActionUI()
         {
             actionPanel.ResetExecutedActionUI();
+        }
+
+        public void ShowModifyValue(float value, Vector2 spawnPosition)
+        {
+            battleEffect.ShowModifyValue(value, spawnPosition);
+            CamController.Instance.ShakeCam(0.15f, shakeAmplitude, shakeFrequency);
         }
 
         // button UI

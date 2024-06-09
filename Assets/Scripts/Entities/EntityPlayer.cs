@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EntityObject
 {
-    public class EntityPlayer : Entity
+    public class EntityPlayer : CharacterEntity
     {
         [HideInInspector] public bool IsMainPlayer;
     }

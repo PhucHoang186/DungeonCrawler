@@ -33,6 +33,7 @@ namespace Managers
         private Node currentNodeSelected;
         private int currentTurnIndex;
         public Node CurrentNodeSelected => currentNodeSelected;
+        public bool inModifiableState;
 
         void Start()
         {
@@ -132,6 +133,9 @@ namespace Managers
                 case ActionType.Move:
                     PlayerMovement();
                     break;
+                case ActionType.Action:
+                    PlayerAction();
+                    break;
             }
         }
 
@@ -140,6 +144,18 @@ namespace Managers
             if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
             {
                 movementCombatManager.MoveEntityToNode(currentPlayer, finalCb: OnFinshAction, successCb: () => { UpdateActionState(ActionState.Progressing); });
+            }
+        }
+
+        private void PlayerAction()
+        {
+            if (!inModifiableState)
+                return;
+
+            if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
+            {
+                currentSpellSelect.ExcuteSpell(this);
+                Debug.LogError("Attack");
             }
         }
 
@@ -269,17 +285,17 @@ namespace Managers
                     movementCombatManager.ClearModifyPath();
                     break;
                 case ActionType.Move:
-                    CamController.Instance.SetCurrentCam(CamType.Battle_View);
+                    CamController.Instance.SetCurrentCam(CamType.Full_View);
                     BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
                     movementCombatManager.ClearModifyPath();
                     break;
                 case ActionType.Action:
                     BattlePhaseUIManager.Instance.GenerateActionCards(new List<SpellData> { spellData });
-                    CamController.Instance.SetCurrentCam(CamType.Battle_View);
+                    CamController.Instance.SetCurrentCam(CamType.Battle_View, currentEntity.transform);
                     BattlePhaseUIManager.Instance.ToggleActionCardPanel(true);
                     break;
                 case ActionType.End_Turn:
-                    CamController.Instance.SetCurrentCam(CamType.Battle_View);
+                    CamController.Instance.SetCurrentCam(CamType.Full_View);
                     BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
                     movementCombatManager.ClearModifyPath();
                     break;
@@ -296,7 +312,7 @@ namespace Managers
             if (!actionPerTurnList.Contains(actionType) && actionType != ActionType.Waiting)
             {
                 actionPerTurnList.Add(actionType);
-                // BattlePhaseUIManager.Instance.UpdateExecutedActionUI(actionType);
+                BattlePhaseUIManager.Instance.UpdateExecutedActionUI(actionType);
             }
 
             bool isOutOfActionToExecute = CheckOutOfAction(actionType);
@@ -311,7 +327,7 @@ namespace Managers
 
         private bool CheckOutOfAction(ActionType actionType)
         {
-            return actionType == ActionType.End_Turn || actionPerTurnList.Count >= 3; // temp
+            return actionType == ActionType.End_Turn;
         }
 
         private void StartCastSpell(SpellData spellData)
@@ -328,6 +344,11 @@ namespace Managers
         public void ShowModifyRange(Node playerNode, Node startNode, int modifyRange)
         {
             movementCombatManager.ShowModifyRange(playerNode, startNode, modifyRange);
+        }
+
+        public void ToggleModifiableState(bool isModifiable)
+        {
+            inModifiableState = isModifiable;
         }
 
 #if UNITY_EDITOR

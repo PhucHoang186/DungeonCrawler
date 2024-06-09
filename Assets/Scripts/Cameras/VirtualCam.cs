@@ -4,6 +4,7 @@ using UnityEngine;
 using Cinemachine;
 using System;
 using NaughtyAttributes;
+using Unity.Mathematics;
 
 public class VirtualCam : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class VirtualCam : MonoBehaviour
     private CinemachineTransposer transposer;
     private CinemachineComposer composer;
     private CinemachineVirtualCamera virtualCam;
-
+    private CinemachineBasicMultiChannelPerlin noise;
     void Awake()
     {
         Init();
@@ -28,6 +29,7 @@ public class VirtualCam : MonoBehaviour
         virtualCam = GetComponent<CinemachineVirtualCamera>();
         transposer = virtualCam.GetCinemachineComponent<CinemachineTransposer>();
         composer = virtualCam.GetCinemachineComponent<CinemachineComposer>();
+        noise = virtualCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
 
         if (useFollow)
             transposer.m_FollowOffset = followOffset;
@@ -57,4 +59,21 @@ public class VirtualCam : MonoBehaviour
         virtualCam.Priority = prior;
     }
 
+    public void ShakeCam(float duration, float amplitude, float frequency)
+    {
+        StartCoroutine(CorShakeCam(duration, amplitude, frequency));
+    }
+
+    private IEnumerator CorShakeCam(float duration, float amplitude, float frequency)
+    {
+        SetNoise(amplitude, frequency);
+        yield return new WaitForSeconds(duration);
+        SetNoise(0f, 0f);
+    }
+
+    private void SetNoise(float amplitude, float frequency)
+    {
+        noise.m_AmplitudeGain = amplitude;
+        noise.m_FrequencyGain = frequency;
+    }
 }

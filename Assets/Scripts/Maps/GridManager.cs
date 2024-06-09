@@ -80,7 +80,7 @@ public class GridManager : MonoBehaviour
         return path;
     }
 
-    public List<Node> GetNeighborNodesWithStep(Node startNode, int stepCount, bool isDiagonal = false)
+    public List<Node> GetNeighborNodesWithStep(Node startNode, int stepCount, bool isDiagonal = false, bool getEmptyOnly = true)
     {
         HashSet<Node> neighborNodesAll = new();
         List<Node> previousStepNodes = new();
@@ -92,7 +92,7 @@ public class GridManager : MonoBehaviour
             var neighborNodes = new List<Node>();
             foreach (Node node in previousStepNodes)
             {
-                neighborNodes.AddRange(GetNeighborNodes(node, isDiagonal));
+                neighborNodes.AddRange(GetNeighborNodes(node, isDiagonal, getEmptyOnly));
             }
             neighborNodesAll.UnionWith(neighborNodes);
             previousStepNodes = neighborNodes;
@@ -101,7 +101,7 @@ public class GridManager : MonoBehaviour
         return neighborNodesAll.ToList();
     }
 
-    public List<Node> GetNeighborNodes(Node startNode, bool isDiagonal = false)
+    public List<Node> GetNeighborNodes(Node startNode, bool isDiagonal = false, bool getEmptyOnly = true)
     {
         List<Node> neighborNodes = new();
         for (int i = -1; i <= 1; i++)
@@ -117,7 +117,7 @@ public class GridManager : MonoBehaviour
                         continue;
                     // add node
                     Node neighborNode = GetNodeByIndex(xIndex, yIndex);
-                    if (!neighborNode.isEmpty)
+                    if ((!neighborNode.isEmpty && getEmptyOnly) || neighborNode is ImmoveableNode)
                         continue;
                     if (neighborNode != null)
                     {

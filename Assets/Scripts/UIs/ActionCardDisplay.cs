@@ -11,6 +11,8 @@ namespace GameUI
 {
     public class ActionCardDisplay : MonoBehaviour, IPointerDownHandler
     {
+        [SerializeField] Outline toggleOutline;
+        [Space(10)]
         [SerializeField] Image actionIcon;
         [SerializeField] TMP_Text actionDescription;
         [Space(10)]
@@ -49,6 +51,7 @@ namespace GameUI
         public void OnPointerDown(PointerEventData eventData)
         {
             GameEvents.ON_SELECT_ACTION?.Invoke(spellData);
+            ToggleSelected(true);
         }
 
         private Color GetOutlineColor(Color originColor, float decreaseAmount = 10f)
@@ -61,6 +64,11 @@ namespace GameUI
             b = Mathf.Max(b, 0f);
 
             return new Color(r, g, b, 1f);
+        }
+
+        private void ToggleSelected(bool isActive)
+        {
+            toggleOutline.enabled = isActive;
         }
     }
 

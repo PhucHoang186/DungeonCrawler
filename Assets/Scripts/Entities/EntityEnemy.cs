@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace EntityObject
 {
-    public class EntityEnemy : Entity
+    public class EntityEnemy : CharacterEntity
     {
         [SerializeField] EnemyAISO enemyAI;
 

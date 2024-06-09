@@ -838,7 +838,6 @@ GameObject:
   - component: {fileID: 3404238320585448032}
   - component: {fileID: 3404238320585448035}
   - component: {fileID: 3404238320585448034}
-  - component: {fileID: 3198649071550052435}
   m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
@@ -919,21 +918,6 @@ MonoBehaviour:
   m_EffectColor: {r: 0.7169812, g: 0.47713622, b: 0.24688502, a: 1}
   m_EffectDistance: {x: 20, y: 20}
   m_UseGraphicAlpha: 1
---- !u!114 &3198649071550052435
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3404238320585448036}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0.8018868, g: 0, b: 0, a: 1}
-  m_EffectDistance: {x: 25, y: 25}
-  m_UseGraphicAlpha: 1
 --- !u!1 &3404238320678780870
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,7 +929,7 @@ GameObject:
   - component: {fileID: 3404238320678780871}
   - component: {fileID: 3859126036536716265}
   m_Layer: 5
-  m_Name: Action Card
+  m_Name: Action Card_v2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -989,7 +973,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0f8dc822c664034488b5223b6160623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  toggleOutline: {fileID: 3198649071550052435}
   actionIcon: {fileID: 3404238320483310824}
   actionDescription: {fileID: 3365639117705037083}
   costText: {fileID: 4842153026801523577}

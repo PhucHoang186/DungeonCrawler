@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GameUI;
 using NaughtyAttributes.Test;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public static class GameHelper
 {
@@ -26,5 +27,10 @@ public static class GameHelper
     {
         var finalPos = CubicCurve(startPoint, startHandlePoint, endHandlePoint, endPoint, t);
         return finalPos;
+    }
+
+    public static Vector2 WorldToScreenPoint(Vector3 worldPoint)
+    {
+        return Camera.main.WorldToScreenPoint(worldPoint);
     }
 }

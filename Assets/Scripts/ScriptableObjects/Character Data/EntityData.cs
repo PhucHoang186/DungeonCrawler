@@ -8,8 +8,12 @@ namespace Data
     {
         public Sprite EntityIcon;
         public EntityType EntityType;
+        public float MaxHealth;
+        public float MaxStamina;
+        public float MaxMana;
         public CharacterClass CharaterClass;
         public List<SpellData> EquippedSpellList = new(5); // max 5 spells can be equipped
         public List<SpellData> LearnedSpellList;
+
     }
 }
