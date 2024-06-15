@@ -18,6 +18,8 @@ namespace Data
         public int ModifyRange;
         public ModifierData ModifyData;
         public ModifierData CostData;
+        public EffectModifier EffectModifier;
+        public float DurationEffect => EffectModifier.effectData.DurationEffect;
 
         public abstract void StartCastSpell(BattleManager battleManager);
         public abstract void CastingSpell(BattleManager battleManager);
@@ -27,7 +29,14 @@ namespace Data
     [Serializable]
     public class ModifierData
     {
-        public ModifyCategory ModifyCategory;
+        public ModifyData ModifyCategory;
         public float ModifyValue;
+    }
+
+    [Serializable]
+    public class EffectModifier
+    {
+        public int Turn;
+        public EffectData effectData;
     }
 }

@@ -155,7 +155,6 @@ namespace Managers
             if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
             {
                 currentSpellSelect.ExcuteSpell(this);
-                Debug.LogError("Attack");
             }
         }
 
@@ -279,7 +278,7 @@ namespace Managers
             switch (currentActionType)
             {
                 case ActionType.Waiting:
-                    CamController.Instance.SetCurrentCam(CamType.Character_View, currentEntity.transform);
+                    CamController.Instance.SetCurrentCam(CamType.Battle_View, currentEntity.transform);
                     BattlePhaseUIManager.Instance.ToggleShowActionPanel(true);
                     BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
                     movementCombatManager.ClearModifyPath();
@@ -291,7 +290,6 @@ namespace Managers
                     break;
                 case ActionType.Action:
                     BattlePhaseUIManager.Instance.GenerateActionCards(new List<SpellData> { spellData });
-                    CamController.Instance.SetCurrentCam(CamType.Battle_View, currentEntity.transform);
                     BattlePhaseUIManager.Instance.ToggleActionCardPanel(true);
                     break;
                 case ActionType.End_Turn:
@@ -351,18 +349,22 @@ namespace Managers
             inModifiableState = isModifiable;
         }
 
-#if UNITY_EDITOR
-        [Button]
-        public void LookAtPlayer()
+        public void ExecuteSpell(SpellData spellData)
         {
-            CamController.Instance.SetCurrentCam(CamType.Character_View, players[0].transform, players[0].transform);
+            StartCoroutine(CorExecuteSpell(spellData));
         }
 
-        [Button]
-        public void Reset()
+        public IEnumerator CorExecuteSpell(SpellData spellData)
         {
-            CamController.Instance.SetCurrentCam(CamType.Battle_View);
+            yield return new WaitForSeconds(spellData.DurationEffect);
+            var enemy = currentNodeSelected.entityOnNode as EntityEnemy;
+            if (enemy != null)
+            {
+                Debug.LogError("Attack");
+                enemy.TakeDamage(spellData.ModifyData.ModifyValue);
+                var screenPos = GameHelper.WorldToScreenPoint(enemy.transform.position);
+                BattlePhaseUIManager.Instance.ShowModifyValue(spellData.ModifyData.ModifyValue, screenPos);
+            }
         }
-#endif
     }
 }

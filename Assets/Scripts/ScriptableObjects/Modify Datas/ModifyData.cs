@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using EntityObject;
 using Managers;
 using UnityEngine;
 
 namespace Data
 {
-    public abstract class ModifyCategory : ScriptableObject
+    public abstract class ModifyData : ScriptableObject
     {
         public ModifyType ModifyType;
 

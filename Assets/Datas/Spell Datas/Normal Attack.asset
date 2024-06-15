@@ -23,3 +23,6 @@ MonoBehaviour:
   CostData:
     ModifyCategory: {fileID: 11400000, guid: b997b3438e1812847a836d6cde3c30c5, type: 2}
     ModifyValue: 1
+  EffectModifier:
+    Turn: 1
+    effectData: {fileID: 11400000, guid: 95fd440ec01dee74d8d4aeb221c8cf42, type: 2}

@@ -25,26 +25,36 @@ namespace Data
                     return;
                 }
             }
-
             battleManager.ToggleModifiableState(false);
         }
 
         public override void ExcuteSpell(BattleManager battleManager)
         {
             Node currentNodeSelected = battleManager.CurrentNodeSelected;
-            var enemy = currentNodeSelected.entityOnNode as EntityEnemy;
-            if (enemy != null)
+
+
+            //effect
+            if (EffectModifier.Turn > 1)
             {
-                enemy.TakeDamage(ModifyData.ModifyValue);
-                var screenPos = GameHelper.WorldToScreenPoint(enemy.transform.position);
-                BattlePhaseUIManager.Instance.ShowModifyValue(ModifyData.ModifyValue, screenPos);
+                //long cast spell
+                EffectModifier.effectData.ShowCastingEffect(battleManager);
             }
+            else
+            {
+                EffectModifier.effectData.ShowExecuteEffect(battleManager);
+            }
+
+            battleManager.ExecuteSpell(this);
+
         }
 
         public override void StartCastSpell(BattleManager battleManager)
         {
             var player = battleManager.currentPlayer;
             battleManager.ShowCastingRange(player.currentNode, CastRange);
+
+
+
         }
     }
 }
