@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
-
+    public static GridManager Instance;
     [SerializeField] PathFinding pathFinding;
     [SerializeField] MoveableNode moveableNodePrefab;
     [SerializeField] ImmoveableNode immoveableNodePrefab;
@@ -21,7 +21,15 @@ public class GridManager : MonoBehaviour
 
     void Awake()
     {
+        if (Instance == null)
+            Instance = this;
         GenerateGrid();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     [Button]
@@ -127,5 +135,11 @@ public class GridManager : MonoBehaviour
             }
         }
         return neighborNodes;
+    }
+
+    public List<Node> GetStraightNodesWithStep(Node startNode, int stepCount, bool getEmptyOnly = true)
+    {
+        HashSet<Node> straightNodesAll = new();
+        return straightNodesAll.ToList();
     }
 }

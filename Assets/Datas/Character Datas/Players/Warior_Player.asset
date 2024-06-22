@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffdd3c62a45564647b4ec237cb5da0fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 387e52f188a488844bb2aa2b8c443fd7, type: 3}
   m_Name: Warior_Player
   m_EditorClassIdentifier: 
   EntityIcon: {fileID: 21300000, guid: f4323efd7b6a6004d8ece79e1846ab23, type: 3}
@@ -18,5 +18,6 @@ MonoBehaviour:
   MaxStamina: 12
   MaxMana: 0
   CharaterClass: 0
-  EquippedSpellList: []
+  EquippedSpellList:
+  - {fileID: 11400000, guid: c2823c48370a7ee40a2032befe79d437, type: 2}
   LearnedSpellList: []

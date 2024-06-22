@@ -12,7 +12,7 @@ namespace Data
         public float MaxStamina;
         public float MaxMana;
         public CharacterClass CharaterClass;
-        public List<SpellData> EquippedSpellList = new(5); // max 5 spells can be equipped
+        public List<SpellData> EquippedSpellList = new();
         public List<SpellData> LearnedSpellList;
 
     }

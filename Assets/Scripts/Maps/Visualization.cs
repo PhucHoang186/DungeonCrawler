@@ -12,6 +12,12 @@ namespace Map
         [SerializeField] LineRenderer modifyVisualize;
         [SerializeField] Transform modifyIndicator;
         [SerializeField] int step;
+        private float stepAmount;
+
+        void Start()
+        {
+            stepAmount = 1f / step;
+        }
 
         public void VisualizePath(List<Node> path)
         {
@@ -42,17 +48,19 @@ namespace Map
 
         public void VisualizeModifyPath(Node startNode, Node endNode)
         {
-            modifyIndicator.gameObject.SetActive(true);
-            modifyIndicator.position = endNode.transform.position;
-
-            float stepAmount = 1f / step;
             modifyVisualize.positionCount = step;
-            float distance = Vector3.Distance(startNode.transform.position, endNode.transform.position);
-            Vector3 crossPorduct = Vector3.Cross(endNode.transform.position - startNode.transform.position, Vector3.up).normalized * distance;
+            Vector3 endPosition = endNode.transform.position;
+            Vector3 startPosition = startNode.transform.position;
+            modifyIndicator.position = endPosition;
+            modifyIndicator.gameObject.SetActive(true);
+
+            float distance = Vector3.Distance(startPosition, endPosition);
+            Vector3 crossPorduct = Vector3.Cross(endPosition - startPosition, Vector3.up * (endPosition.x - startPosition.x)).normalized * distance;
+
             for (int i = 0; i < step; i++)
             {
-                Vector3 pos = GameHelper.ShowBezierCurve(startNode.transform.position, startNode.transform.position + crossPorduct,
-                endNode.transform.position + crossPorduct, endNode.transform.position, i * stepAmount);
+                Vector3 pos = GameHelper.ShowBezierCurve(startPosition, startPosition + crossPorduct,
+                endPosition + crossPorduct, endPosition, i * stepAmount);
                 modifyVisualize.SetPosition(i, pos);
             }
         }

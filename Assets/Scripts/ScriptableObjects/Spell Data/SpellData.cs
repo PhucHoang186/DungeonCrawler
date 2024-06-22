@@ -16,7 +16,7 @@ namespace Data
         public bool NeedTarget = true;
         public int CastRange;
         public int ModifyRange;
-        public ModifierData ModifyData;
+        public ModifierData ModifierData;
         public ModifierData CostData;
         public EffectModifier EffectModifier;
         public float DurationEffect => EffectModifier.effectData.DurationEffect;
@@ -29,14 +29,14 @@ namespace Data
     [Serializable]
     public class ModifierData
     {
-        public ModifyData ModifyCategory;
+        public ModifyData ModifyData;
         public float ModifyValue;
     }
 
     [Serializable]
     public class EffectModifier
     {
-        public int Turn;
         public EffectData effectData;
+        public int Turn;
     }
 }

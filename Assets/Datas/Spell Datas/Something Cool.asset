@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3073df2aa9b376b4dbcd6888221bf834, type: 3}
-  m_Name: Normal Attack
+  m_Name: Something Cool
   m_EditorClassIdentifier: 
-  SpellIcon: {fileID: 21300000, guid: 2b1603372ddf5bc48ace841bdf00d379, type: 3}
+  SpellIcon: {fileID: 21300000, guid: b1604ba22c887194d86c42c5c2d6df73, type: 3}
   SpellDescription: Some Useful Info
   NeedTarget: 1
   CastRange: 1
   ModifyRange: 0
   ModifierData:
     ModifyData: {fileID: 11400000, guid: 34d7b8bf9dd72a64c8a78b8aec1b197e, type: 2}
-    ModifyValue: 10
+    ModifyValue: 1
   CostData:
     ModifyData: {fileID: 11400000, guid: 75b2718488509ef4b99f5d69e63c2f0c, type: 2}
     ModifyValue: 1
   EffectModifier:
-    effectData: {fileID: 11400000, guid: 95fd440ec01dee74d8d4aeb221c8cf42, type: 2}
+    effectData: {fileID: 0}
     Turn: 0

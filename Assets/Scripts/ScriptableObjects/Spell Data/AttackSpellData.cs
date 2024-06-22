@@ -11,14 +11,19 @@ namespace Data
     [CreateAssetMenu(menuName = "Data/Spell/AttackSpell")]
     public class AttackSpellData : SpellData
     {
+        public CastPattern CastPattern;
+
         public override void CastingSpell(BattleManager battleManager)
         {
             var player = battleManager.currentPlayer;
             Node currentNodeSelected = battleManager.CurrentNodeSelected;
             if (NeedTarget)
             {
+                // var castableNodes = battleManager.ShowModifyRange(player.currentNode, currentNodeSelected, ModifyRange);
+                // if (castableNodes == null)
+                    // return;
+
                 var enemies = battleManager.GetAllEnemies();
-                battleManager.ShowModifyRange(player.currentNode, currentNodeSelected, ModifyRange);
                 if (enemies.Contains(currentNodeSelected.entityOnNode as EntityEnemy))
                 {
                     battleManager.ToggleModifiableState(true);
@@ -30,9 +35,6 @@ namespace Data
 
         public override void ExcuteSpell(BattleManager battleManager)
         {
-            Node currentNodeSelected = battleManager.CurrentNodeSelected;
-
-
             //effect
             if (EffectModifier.Turn > 1)
             {
@@ -51,10 +53,7 @@ namespace Data
         public override void StartCastSpell(BattleManager battleManager)
         {
             var player = battleManager.currentPlayer;
-            battleManager.ShowCastingRange(player.currentNode, CastRange);
-
-
-
+            // battleManager.ShowCastingRange(player.currentNode, CastRange);
         }
     }
 }

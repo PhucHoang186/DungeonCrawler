@@ -17,7 +17,6 @@ namespace Managers
         public EntityEnemy currentEnemy;
         [SerializeField] int turnPerRound;
         [SerializeField] EnemyAIManager enemyAIManager;
-        [SerializeField] SpellData spellData;
         private GridManager gridManager;
         private Entity currentEntity;
         private List<Entity> allEntities = new();
@@ -26,30 +25,31 @@ namespace Managers
         private EntityManager entityManager;
         private MovementCombatManager movementCombatManager;
         private TurnBaseType currentTurnType;
-        private ActionState currentActionState = ActionState.Done;
-        private ActionType currentActionType;
-        private HashSet<ActionType> actionPerTurnList = new();
+        private CommandStatus currentCommandStatus = CommandStatus.Done;
+        private CommandType currentActionType;
+        private HashSet<CommandType> actionPerTurnList = new();
         private SpellData currentSpellSelect;
         private Node currentNodeSelected;
         private int currentTurnIndex;
-        public Node CurrentNodeSelected => currentNodeSelected;
+        private ActionCardDisplay curentUsedCard;
         public bool inModifiableState;
+        private bool isPlayerState;
+
+        public Node CurrentNodeSelected => currentNodeSelected;
 
         void Start()
         {
             GameEvents.ON_MOUSE_OVER_NODE += OnMouseOverNode;
-            GameEvents.ON_SELECT_ACTION += OnSelectAction;
         }
 
         void OnDestroy()
         {
             GameEvents.ON_MOUSE_OVER_NODE -= OnMouseOverNode;
-            GameEvents.ON_SELECT_ACTION -= OnSelectAction;
         }
 
         private void OnMouseOverNode(Node targetNode)
         {
-            if (!IsActionState(ActionState.Done))
+            if (!CheckCommandStatus(CommandStatus.Done))
                 return;
             if (currentTurnType != TurnBaseType.Player)
                 return;
@@ -60,18 +60,21 @@ namespace Managers
             currentNodeSelected = targetNode;
             switch (currentActionType)
             {
-                case ActionType.Move:
+                case CommandType.Move:
                     UpdateMovePath(targetNode);
                     break;
-                case ActionType.Action:
-                    UpdatActionNode();
+                case CommandType.Waiting_Action:
+                case CommandType.Action:
+                    UpdatActionNode(targetNode);
                     break;
             }
         }
 
-        private void OnSelectAction(SpellData data)
+        private void OnSelectAction(ActionCardDisplay actionCard)
         {
-            StartCastSpell(data);
+            curentUsedCard = actionCard;
+            StartCastSpell(actionCard.SpellData);
+            BattlePhaseUIManager.Instance.OnSelectCard(actionCard);
         }
 
         private void UpdateMovePath(Node targetNode)
@@ -81,7 +84,7 @@ namespace Managers
             if (!targetNode.isEmpty)
                 return;
 
-            movementCombatManager.ShowWalkablePath(currentPlayer.currentNode, targetNode, 2, true);
+            movementCombatManager.ShowWalkablePath(currentPlayer.currentNode, targetNode, 5, true);
         }
 
         public void Init(EntityManager entityManager, MovementCombatManager movementCombatManager, GridManager gridManager)
@@ -91,8 +94,14 @@ namespace Managers
             this.movementCombatManager = movementCombatManager;
             this.gridManager = gridManager;
             BattlePhaseUIManager.Instance?.GenerateTurnIcons(turnPerRound);
-            BattlePhaseUIManager.Instance?.AssignChangeActionTypeCb(UpdateActionType);
+            BattlePhaseUIManager.Instance?.AssignChangeActionTypeCb(UpdateCommandTypeImmediately);
             GetNextTurn();
+            CamController.Instance.SetCurrentCam(CamType.Full_View);
+        }
+
+        private void UpdateCommandTypeImmediately(CommandType newType)
+        {
+            UpdateCommandType(newType, 0f);
         }
 
         public void GetNextTurn()
@@ -100,18 +109,18 @@ namespace Managers
             currentEnemy = null;
             currentPlayer = null;
             currentEntity = GetAvailableEntity();
-            bool isPlayerTurn = IsPLayerTurn();
+            isPlayerState = IsPLayerTurn();
 
             BattlePhaseUIManager.Instance?.UpdateTurn(currentTurnIndex);
             currentTurnIndex++;
 
-            if (isPlayerTurn)
+            if (isPlayerState)
                 currentPlayer = currentEntity as EntityPlayer;
             else
                 currentEnemy = currentEntity as EntityEnemy;
 
-            OnChangeTurn(isPlayerTurn ? TurnBaseType.Player : TurnBaseType.Enemy);
-            UpdateActionType(isPlayerTurn ? ActionType.Waiting : ActionType.Move); // temp
+            OnChangeTurnType(isPlayerState ? TurnBaseType.Player : TurnBaseType.Enemy);
+            UpdateCommandType(CommandType.Waiting, 1f);
         }
 
         private void Update()
@@ -130,10 +139,11 @@ namespace Managers
         {
             switch (currentActionType)
             {
-                case ActionType.Move:
+                case CommandType.Move:
                     PlayerMovement();
                     break;
-                case ActionType.Action:
+                case CommandType.Waiting_Action:
+                case CommandType.Action:
                     PlayerAction();
                     break;
             }
@@ -143,7 +153,7 @@ namespace Managers
         {
             if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
             {
-                movementCombatManager.MoveEntityToNode(currentPlayer, finalCb: OnFinshAction, successCb: () => { UpdateActionState(ActionState.Progressing); });
+                movementCombatManager.MoveEntityToNode(currentPlayer, finalCb: OnFinshAction, successCb: () => { UpdateCommandStatus(CommandStatus.Progressing); });
             }
         }
 
@@ -154,60 +164,56 @@ namespace Managers
 
             if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
             {
-                currentSpellSelect.ExcuteSpell(this);
+                OnUseSpell();
             }
         }
 
-        private void UpdatActionNode()
+        private void UpdatActionNode(Node node)
         {
-            if (currentSpellSelect == null)
-                return;
-            currentSpellSelect.CastingSpell(this);
+            SpellManager.Instance.GetNodeMouseOn(node);
+            SpellManager.Instance.CastingSpell(movementCombatManager);
         }
 
         private void OnFinshAction()
         {
-            UpdateActionState(ActionState.Done);
-            UpdateActionType(ActionType.Waiting);
+            UpdateCommandStatus(CommandStatus.Done);
+            UpdateCommandType(CommandType.Waiting);
         }
 
         private void EnemyTurn()
         {
-            StartCoroutine(CorEnemyTurn());
+            if (currentEnemy == null)
+                return;
+            if (CheckCommandStatus(CommandStatus.Progressing))
+                return;
+
+            // UpdateActionStatus(ActionStatus.Progressing);
         }
 
-        private IEnumerator CorEnemyTurn()
+        public void StartEnemyMovement(Node desNode)
         {
-            //temp
-            if (currentEnemy == null)
-                yield break; ;
-            if (IsActionState(ActionState.Progressing))
-                yield break;
-            UpdateActionState(ActionState.Progressing);
-            yield return new WaitForSeconds(1f);
-            Node desNode = enemyAIManager.GetMovementAction(currentEnemy, gridManager, this);
-            if (desNode == null)
-                yield break;
+            UpdateCommandStatus(CommandStatus.Progressing);
             movementCombatManager.ShowWalkablePath(currentEnemy.currentNode, desNode, 1, false);
-            movementCombatManager.MoveEntityToNode(currentEnemy, finalCb: EnemyFinishAction, failCb: EnemyFinishAction);
+            movementCombatManager.MoveEntityToNode(currentEnemy, finalCb: EnemyFinishCommand, failCb: EnemyFinishCommand);
         }
 
         // temp
-        private void EnemyFinishAction()
+        private void EnemyFinishCommand()
         {
-            UpdateActionState(ActionState.Done);
-            UpdateActionType(ActionType.End_Turn);
+            UpdateCommandStatus(CommandStatus.Done);
+            UpdateCommandType(CommandType.Waiting);
         }
 
-        public void OnChangeTurn(TurnBaseType newType)
+        public void OnChangeTurnType(TurnBaseType newType)
         {
             if (this.currentTurnType == newType)
                 return;
-
+            isPlayerState = newType == TurnBaseType.Player;
             this.currentTurnType = newType;
             switch (currentTurnType)
             {
                 case TurnBaseType.Player:
+                SpellManager.Instance.GetCurrentPlayerSelected(currentPlayer);
                     break;
                 case TurnBaseType.Enemy:
                     break;
@@ -259,90 +265,162 @@ namespace Managers
             return currentEntity is EntityPlayer;
         }
 
-        public void UpdateActionState(ActionState newState)
+        public void UpdateCommandStatus(CommandStatus newStatus)
         {
-            currentActionState = newState;
+            currentCommandStatus = newStatus;
         }
 
-        private bool IsActionState(ActionState checkState)
+        private bool CheckCommandStatus(CommandStatus checkStatus)
         {
-            return currentActionState == checkState;
+            return currentCommandStatus == checkStatus;
         }
 
-        public void UpdateActionType(ActionType newType)
+        public void UpdateCommandType(CommandType newType, float delay = 0f)
+        {
+            StartCoroutine(CorUpdateCommandType(newType, delay));
+        }
+
+        private IEnumerator CorUpdateCommandType(CommandType newType, float delay = 0f)
         {
             currentActionType = newType;
             movementCombatManager.OnResetNodes();
-            UpdateExecuteedAction(newType);
-            BattlePhaseUIManager.Instance.ToggleShowActionPanel(false);
+            ClearModifyPath();
+            BattlePhaseUIManager.Instance.ToggleShowCommandPanel(false);
+
+            bool isPlayerState = this.isPlayerState;
+            UpdateExecutedCommandUI(newType, isPlayerState);
+            yield return new WaitForSeconds(delay);
+
             switch (currentActionType)
             {
-                case ActionType.Waiting:
-                    CamController.Instance.SetCurrentCam(CamType.Battle_View, currentEntity.transform);
-                    BattlePhaseUIManager.Instance.ToggleShowActionPanel(true);
-                    BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
-                    movementCombatManager.ClearModifyPath();
+                case CommandType.Waiting:
+                    if (isPlayerState)
+                        PlayerWaitingPhase();
+                    else
+                        EnemyWaitingPhase();
                     break;
-                case ActionType.Move:
-                    CamController.Instance.SetCurrentCam(CamType.Full_View);
-                    BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
-                    movementCombatManager.ClearModifyPath();
+                case CommandType.Move:
+                    if (isPlayerState)
+                        PlayerMovePhase();
+                    else
+                        EnemyMovePhase();
                     break;
-                case ActionType.Action:
-                    BattlePhaseUIManager.Instance.GenerateActionCards(new List<SpellData> { spellData });
-                    BattlePhaseUIManager.Instance.ToggleActionCardPanel(true);
+                case CommandType.Action:
+                    if (isPlayerState)
+                        PlayerActionPhase();
+                    else
+                        EnemyActionPhase();
                     break;
-                case ActionType.End_Turn:
-                    CamController.Instance.SetCurrentCam(CamType.Full_View);
-                    BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
-                    movementCombatManager.ClearModifyPath();
+                case CommandType.End_Turn:
+                    if (isPlayerState)
+                        PlayerEndPhase();
+                    else
+                        EnemyEndTurnPhase();
+                    break;
+                case CommandType.Waiting_Action:
                     break;
             }
         }
 
-        public bool IsActionType(ActionType checkType)
+        private void PlayerEndPhase()
+        {
+            CamController.Instance.SetCurrentCam(CamType.Full_View);
+            BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
+            BattlePhaseUIManager.Instance.ResetExecutedActionUI();
+            actionPerTurnList.Clear();
+            GetNextTurn();
+        }
+
+        private void PlayerActionPhase()
+        {
+            CharacterData characterData = currentPlayer.EntityData as CharacterData;
+            List<SpellData> spells = SpellManager.Instance.GetSpellsForTurn(5, characterData);
+
+            BattlePhaseUIManager.Instance.InitActionCards(spells, OnSelectAction);
+            BattlePhaseUIManager.Instance.ToggleActionCardPanel(true);
+        }
+
+        private void PlayerMovePhase()
+        {
+            CamController.Instance.SetCurrentCam(CamType.Full_View);
+            BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
+        }
+
+        private void PlayerWaitingPhase()
+        {
+            CamController.Instance.SetCurrentCam(CamType.Battle_View, currentEntity.transform);
+            BattlePhaseUIManager.Instance.ToggleShowCommandPanel(true);
+            BattlePhaseUIManager.Instance.ToggleActionCardPanel(false);
+        }
+
+        private void EnemyEndTurnPhase()
+        {
+            CamController.Instance.SetCurrentCam(CamType.Full_View);
+            GetNextTurn();
+        }
+
+        private void EnemyActionPhase()
+        {
+
+        }
+
+        private void EnemyMovePhase()
+        {
+
+        }
+
+        private void EnemyWaitingPhase()
+        {
+            enemyAIManager.GetEnemyAction(currentEnemy, gridManager, this);
+        }
+
+        private void ClearModifyPath()
+        {
+            movementCombatManager.ClearModifyPath();
+        }
+
+        public bool IsActionType(CommandType checkType)
         {
             return currentActionType == checkType;
         }
 
-        public void UpdateExecuteedAction(ActionType actionType)
+        public void UpdateExecutedCommandUI(CommandType commandType, bool isPlayer)
         {
-            if (!actionPerTurnList.Contains(actionType) && actionType != ActionType.Waiting)
-            {
-                actionPerTurnList.Add(actionType);
-                BattlePhaseUIManager.Instance.UpdateExecutedActionUI(actionType);
-            }
+            if (!isPlayer)
+                return;
 
-            bool isOutOfActionToExecute = CheckOutOfAction(actionType);
-            if (isOutOfActionToExecute)
+            if (!actionPerTurnList.Contains(commandType) && commandType != CommandType.Waiting)
             {
-                // reset
-                actionPerTurnList.Clear();
-                BattlePhaseUIManager.Instance.ResetExecutedActionUI();
-                GetNextTurn();
+                actionPerTurnList.Add(commandType);
+                BattlePhaseUIManager.Instance.UpdateExecutedCommandUI(commandType);
             }
         }
 
-        private bool CheckOutOfAction(ActionType actionType)
+        private bool CheckEndTurn(CommandType actionType)
         {
-            return actionType == ActionType.End_Turn;
+            return actionType == CommandType.End_Turn;
         }
 
         private void StartCastSpell(SpellData spellData)
         {
             currentSpellSelect = spellData;
+            SpellManager.Instance.GetCurrentUsedSpell(spellData);
             spellData.StartCastSpell(this);
         }
 
-        public void ShowCastingRange(Node startNode, int castRange)
+        private void OnUseSpell()
         {
-            movementCombatManager.ShowCastingRange(startNode, castRange);
+            currentSpellSelect.ExcuteSpell(this);
+            BattlePhaseUIManager.Instance.OnUseCard(curentUsedCard);
+            currentSpellSelect = null;
+            UpdateCommandType(CommandType.Waiting_Action);
+            ToggleModifiableState(false);
         }
 
-        public void ShowModifyRange(Node playerNode, Node startNode, int modifyRange)
-        {
-            movementCombatManager.ShowModifyRange(playerNode, startNode, modifyRange);
-        }
+        // public void ShowCastingRange(Node startNode, int castRange)
+        // {
+        //     movementCombatManager.ShowCastingRange(startNode, castRange);
+        // }
 
         public void ToggleModifiableState(bool isModifiable)
         {
@@ -361,10 +439,15 @@ namespace Managers
             if (enemy != null)
             {
                 Debug.LogError("Attack");
-                enemy.TakeDamage(spellData.ModifyData.ModifyValue);
+                enemy.TakeDamage(spellData.ModifierData.ModifyValue);
                 var screenPos = GameHelper.WorldToScreenPoint(enemy.transform.position);
-                BattlePhaseUIManager.Instance.ShowModifyValue(spellData.ModifyData.ModifyValue, screenPos);
+                BattlePhaseUIManager.Instance.ShowModifyValue(spellData.ModifierData.ModifyValue, screenPos);
             }
+        }
+
+        public List<Node> GetCastRange()
+        {
+            return movementCombatManager.CastNodes;
         }
     }
 }

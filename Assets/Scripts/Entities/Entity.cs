@@ -8,15 +8,18 @@ namespace EntityObject
 {
     public class Entity : MonoBehaviour
     {
-        [SerializeField] SpriteRenderer entityIcon;
-        public EntityData entityData;
+        [SerializeField] protected SpriteRenderer entityIcon;
+        [SerializeField] protected EntityData entityData;
         public Node currentNode;
+        public EntityData EntityData => entityData;
 
-        public void Init(Node placeOnNode)
+        public void Init(Node placeOnNode, EntityData entityData)
         {
             currentNode = placeOnNode;
             entityIcon.sprite = entityData.EntityIcon;
+            this.entityData = entityData;
             placeOnNode.entityOnNode = this;
+            placeOnNode.SetEmptyState(false);
         }
 
         protected void UpdateNode(Node newNode)
@@ -24,10 +27,6 @@ namespace EntityObject
             currentNode?.SetEmptyState(true);
             currentNode = newNode;
             newNode.SetEmptyState(false);
-        }
-
-        protected virtual void Update()
-        {
         }
     }
 }

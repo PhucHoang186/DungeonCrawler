@@ -12,9 +12,14 @@ namespace EntityObject
     {
         [SerializeField] EnemyAISO enemyAI;
 
-        public virtual Node GetMovementAction(GridManager gridManger, BattleManager battleManager)
+        public virtual Node GetMovement(GridManager gridManger, BattleManager battleManager)
         {
-            return enemyAI.GetMovementAction(gridManger, battleManager, this);
+            return enemyAI.GetMovement(gridManger, battleManager, this);
+        }
+
+        public virtual Node GetAction(GridManager gridManger, BattleManager battleManager)
+        {
+            return enemyAI.GetMovement(gridManger, battleManager, this);
         }
     }
 }

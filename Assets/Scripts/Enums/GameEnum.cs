@@ -5,22 +5,24 @@ public enum EntityType
 
 public enum TurnBaseType
 {
+    None,
     Player,
     Enemy,
 }
 
-public enum ActionState
+public enum CommandStatus
 {
     Progressing,
     Done,
 }
 
-public enum ActionType
+public enum CommandType
 {
     Move,
     Action,
     End_Turn,
     Waiting,
+    Waiting_Action,
 }
 
 public enum CharacterClass
@@ -48,5 +50,18 @@ public enum ModifyType
     Health,
     Stamina,
     Damage,
+}
+
+public enum CharacterEntityState
+{
+    Live,
+    Down,
+    Destroy,
+}
+
+public enum CastPattern
+{
+    Around,
+    Straight_Line
 }
 

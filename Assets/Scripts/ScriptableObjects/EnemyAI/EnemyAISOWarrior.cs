@@ -10,20 +10,68 @@ namespace AIBehavior
     [CreateAssetMenu(menuName = "AI/EnemyAI_Warrior")]
     public class EnemyAISOWarrior : EnemyAISO
     {
-        public override Node GetMovementAction(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)
+        #region Abstract Class
+
+        public override Node GetAction(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)
         {
-            Node desNode = null;
+            var castRange = battleManager.GetCastRange();
+
+            for (int i = 0; i < castRange.Count; i++)
+            {
+                Entity entity = castRange[i].entityOnNode;
+                if (entity != null && entity is EntityPlayer)
+                {
+                    // attack
+                }
+            }
+
+            return null;
+        }
+
+        public override Node GetMovement(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)
+        {
             var players = battleManager.GetAllPlayers();
-            var targetPlayer = players[0];
-
-            int xDistance = (int)(targetPlayer.transform.position.x - enemy.transform.position.x);
-            int yDistance = (int)(targetPlayer.transform.position.z - enemy.transform.position.z);
-            int trueDistance = xDistance + yDistance;
-            // int finalStep = Mathf.Min(trueDistance, (int)strength);
-
-            //temp
-            desNode = gridManger.GetNodeByIndex(enemy.currentNode.X + xDistance, enemy.currentNode.Y + yDistance + 1);
+            var targetPlayer = GetNearestPlayer(players, enemy);
+            var neighBorNode = gridManger.GetNeighborNodes(targetPlayer.currentNode);
+            // temp
+            Node desNode = GetShortestPath(neighBorNode, enemy);
             return desNode;
+        }
+
+        #endregion
+
+        private EntityPlayer GetNearestPlayer(List<EntityPlayer> players, EntityEnemy enemy)
+        {
+            EntityPlayer player = null;
+            float minDistance = Mathf.Infinity;
+
+            for (int i = 0; i < players.Count; i++)
+            {
+                float distance = Vector3.Distance(enemy.transform.position, players[i].transform.position);
+                if (distance < minDistance)
+                {
+                    player = players[i];
+                    minDistance = distance;
+                }
+            }
+            return player;
+        }
+
+
+        private Node GetShortestPath(List<Node> nodes, EntityEnemy enemy)
+        {
+            Node node = null;
+            float minDistance = Mathf.Infinity;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                float distance = Vector3.Distance(nodes[i].transform.position, enemy.transform.position);
+                if (distance < minDistance)
+                {
+                    node = nodes[i];
+                    minDistance = distance;
+                }
+            }
+            return node;
         }
     }
 }

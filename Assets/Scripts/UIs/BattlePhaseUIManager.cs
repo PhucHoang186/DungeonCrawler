@@ -13,14 +13,14 @@ namespace GameUI
         public static BattlePhaseUIManager Instance;
         [SerializeField] TurnIconDisplay turnIconDisplayPrefab;
         [SerializeField] Transform turnHolder;
-        [SerializeField] ActionPanelUI actionPanel;
+        [SerializeField] ActionPanelUI commandPanel;
         [SerializeField] ActionCardPanel actionCardPanel;
         [SerializeField] BattleUIEffect battleEffect;
         [SerializeField] float shakeAmplitude;
         [SerializeField] float shakeFrequency;
 
         private List<TurnIconDisplay> turnIconDisplays = new();
-        private Action<ActionType> onChangeActionTypeCb;
+        private Action<CommandType> onChangeActionTypeCb;
 
         void Awake()
         {
@@ -42,7 +42,7 @@ namespace GameUI
             }
         }
 
-        public void AssignChangeActionTypeCb(Action<ActionType> onChangeActionTypeCb)
+        public void AssignChangeActionTypeCb(Action<CommandType> onChangeActionTypeCb)
         {
             this.onChangeActionTypeCb = onChangeActionTypeCb;
         }
@@ -60,7 +60,7 @@ namespace GameUI
         {
             for (int i = 0; i < entities.Count; i++)
             {
-                turnIconDisplays[i].SetIcon(entities[i].entityData.EntityIcon);
+                turnIconDisplays[i].SetIcon(entities[i].EntityData.EntityIcon);
             }
         }
 
@@ -73,9 +73,9 @@ namespace GameUI
                 turnIconDisplays[i].ToggleTurn(i == turnIndex);
         }
 
-        public void GenerateActionCards(List<SpellData> spellDatas)
+        public void InitActionCards(List<SpellData> spellDatas, Action<ActionCardDisplay> OnSelectCardCb)
         {
-            actionCardPanel.GenerateActionCards(spellDatas);
+            actionCardPanel.InitActionCards(spellDatas, OnSelectCardCb);
         }
 
         public void DestroyActionCards()
@@ -88,20 +88,20 @@ namespace GameUI
             actionCardPanel.ToggleActionCardPanel(isActive);
         }
 
-        public void ToggleShowActionPanel(bool isActive)
+        public void ToggleShowCommandPanel(bool isActive)
         {
-            actionPanel.ToggleShowPanel(isActive);
-            actionPanel.ShowCancelButton(!isActive);
+            commandPanel.ToggleCommandPanel(isActive);
+            commandPanel.ShowCancelButton(!isActive);
         }
 
-        public void UpdateExecutedActionUI(ActionType actionType)
+        public void UpdateExecutedCommandUI(CommandType actionType)
         {
-            actionPanel.UpdateExecutedActionUI(actionType);
+            commandPanel.UpdateExecutedCommandUI(actionType);
         }
 
         public void ResetExecutedActionUI()
         {
-            actionPanel.ResetExecutedActionUI();
+            commandPanel.ResetExecutedActionUI();
         }
 
         public void ShowModifyValue(float value, Vector2 spawnPosition)
@@ -113,25 +113,35 @@ namespace GameUI
         // button UI
         public void OnMoveCallback()
         {
-            onChangeActionTypeCb?.Invoke(ActionType.Move);
+            onChangeActionTypeCb?.Invoke(CommandType.Move);
         }
 
         // button UI
         public void OnActionCallback()
         {
-            onChangeActionTypeCb?.Invoke(ActionType.Action);
+            onChangeActionTypeCb?.Invoke(CommandType.Action);
         }
 
         // button UI
         public void OnEndTurnCallback()
         {
-            onChangeActionTypeCb?.Invoke(ActionType.End_Turn);
+            onChangeActionTypeCb?.Invoke(CommandType.End_Turn);
         }
 
         // button UI
         public void OnCancelAction()
         {
-            onChangeActionTypeCb?.Invoke(ActionType.Waiting);
+            onChangeActionTypeCb?.Invoke(CommandType.Waiting);
+        }
+
+        public void OnSelectCard(ActionCardDisplay actionCard)
+        {
+            actionCardPanel.OnSelectCard(actionCard);
+        }
+
+        public void OnUseCard(ActionCardDisplay actionCard)
+        {
+            actionCardPanel.OnUseCard(actionCard);
         }
     }
 }

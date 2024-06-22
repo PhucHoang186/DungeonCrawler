@@ -11,9 +11,9 @@ namespace GameUI
     {
         [SerializeField] Transform display;
         [SerializeField] Button cancelButton;
-        [SerializeField] List<ActionButtonData> actionButtonDatas;
+        [SerializeField] List<CommandButtonData> commandButtonDatas;
 
-        public void ToggleShowPanel(bool isActive)
+        public void ToggleCommandPanel(bool isActive)
         {
             display.DOScaleY(isActive ? 1f : 0f, 0.2f).SetEase(Ease.InOutBounce);
         }
@@ -23,30 +23,30 @@ namespace GameUI
             cancelButton.gameObject.SetActive(isActive);
         }
 
-        public void UpdateExecutedActionUI(ActionType actionType)
+        public void UpdateExecutedCommandUI(CommandType actionType)
         {
-            for (int i = 0; i < actionButtonDatas.Count; i++)
+            for (int i = 0; i < commandButtonDatas.Count; i++)
             {
-                if (actionButtonDatas[i].actionType == actionType)
+                if (commandButtonDatas[i].actionType == actionType)
                 {
-                    actionButtonDatas[i].actionButton.interactable = false;
+                    commandButtonDatas[i].actionButton.interactable = false;
                 }
             }
         }
 
         public void ResetExecutedActionUI()
         {
-            for (int i = 0; i < actionButtonDatas.Count; i++)
+            for (int i = 0; i < commandButtonDatas.Count; i++)
             {
-                actionButtonDatas[i].actionButton.interactable = true;
+                commandButtonDatas[i].actionButton.interactable = true;
             }
         }
     }
 }
 
 [Serializable]
-public class ActionButtonData
+public class CommandButtonData
 {
-    public ActionType actionType;
+    public CommandType actionType;
     public Button actionButton;
 }

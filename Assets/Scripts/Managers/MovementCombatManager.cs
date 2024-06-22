@@ -30,6 +30,11 @@ public class MovementCombatManager : MonoBehaviour
     private bool startMoveToNode;
     private float currentMoveCountDown;
 
+    public List<Node> MoveNodes => moveNodes;
+    public List<Node> CastNodes => castNodes;
+    public List<Node> ModifyNodes => modifyNodes;
+
+
     public void Init(GridManager gridManager, EntityManager entityManager)
     {
         this.gridManager = gridManager;
@@ -95,21 +100,20 @@ public class MovementCombatManager : MonoBehaviour
         }
     }
 
-    public void ShowCastingRange(Node startNode, int affectRange)
+    public void ShowCastingRange(List<Node> castNodes)
     {
-        castNodes = gridManager.GetNeighborNodesWithStep(startNode, affectRange, getEmptyOnly: false);
+        this.castNodes = castNodes;
         VisualizeRange(castNodes, highlightType.ActionRange);
     }
 
-    public List<Node> ShowModifyRange(Node currentPlayerNode, Node startNode, int modifyRange)
+    public List<Node> ShowModifyRange(Node currentPlayerNode, Node targetNode, List<Node> modifyNodes)
     {
-        if (!castNodes.Contains(startNode))
+        if (!castNodes.Contains(targetNode))
             return null;
-
         ResetNode(modifyNode: true, revertLastState: true);
-        modifyNodes = gridManager.GetNeighborNodesWithStep(startNode, modifyRange, getEmptyOnly: false);
+        this.modifyNodes = modifyNodes;
         VisualizeRange(modifyNodes, highlightType.Action, false);
-        VisualizeModifyPath(currentPlayerNode, startNode);
+        VisualizeModifyPath(currentPlayerNode, targetNode);
 
         return modifyNodes;
     }
