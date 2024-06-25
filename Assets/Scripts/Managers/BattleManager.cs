@@ -5,9 +5,7 @@ using Data;
 using EntityObject;
 using GameUI;
 using Map;
-using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Managers
 {
@@ -28,14 +26,9 @@ namespace Managers
         private CommandStatus currentCommandStatus = CommandStatus.Done;
         private CommandType currentActionType;
         private HashSet<CommandType> actionPerTurnList = new();
-        private SpellData currentSpellSelect;
-        private Node currentNodeSelected;
         private int currentTurnIndex;
         private ActionCardDisplay curentUsedCard;
-        public bool inModifiableState;
         private bool isPlayerState;
-
-        public Node CurrentNodeSelected => currentNodeSelected;
 
         void Start()
         {
@@ -57,7 +50,6 @@ namespace Managers
                 return;
             if (currentPlayer.currentNode == targetNode)
                 return;
-            currentNodeSelected = targetNode;
             switch (currentActionType)
             {
                 case CommandType.Move:
@@ -65,7 +57,7 @@ namespace Managers
                     break;
                 case CommandType.Waiting_Action:
                 case CommandType.Action:
-                    UpdatActionNode(targetNode);
+                    OnCastingSpell(targetNode);
                     break;
             }
         }
@@ -73,7 +65,7 @@ namespace Managers
         private void OnSelectAction(ActionCardDisplay actionCard)
         {
             curentUsedCard = actionCard;
-            StartCastSpell(actionCard.SpellData);
+            OnSelectSpell(actionCard.SpellData);
             BattlePhaseUIManager.Instance.OnSelectCard(actionCard);
         }
 
@@ -159,19 +151,22 @@ namespace Managers
 
         private void PlayerAction()
         {
-            if (!inModifiableState)
+            if (!SpellManager.Instance.IsExecutable)
                 return;
 
             if (!InputManager.InputData.isPointerOverUI && InputManager.InputData.isMouseDownLeft)
             {
-                OnUseSpell();
+                OnExecuteSpell();
             }
         }
 
-        private void UpdatActionNode(Node node)
+
+        private void ShowActionRanges(List<Node> castNodes, List<Node> modifyNodes, Node startNode, Node endNode)
         {
-            SpellManager.Instance.GetNodeMouseOn(node);
-            SpellManager.Instance.CastingSpell(movementCombatManager);
+            if (castNodes == null || modifyNodes == null || startNode == null || endNode == null)
+                return;
+            movementCombatManager.ShowCastingRange(castNodes);
+            movementCombatManager.ShowModifyRange(startNode, endNode, modifyNodes);
         }
 
         private void OnFinshAction()
@@ -213,7 +208,7 @@ namespace Managers
             switch (currentTurnType)
             {
                 case TurnBaseType.Player:
-                SpellManager.Instance.GetCurrentPlayerSelected(currentPlayer);
+                    SpellManager.Instance.GetCurrentPlayerSelected(currentPlayer);
                     break;
                 case TurnBaseType.Enemy:
                     break;
@@ -286,6 +281,7 @@ namespace Managers
             movementCombatManager.OnResetNodes();
             ClearModifyPath();
             BattlePhaseUIManager.Instance.ToggleShowCommandPanel(false);
+            BattlePhaseUIManager.Instance.ToggleActionCardPanel(CheckShowActionCardPanel(newType));
 
             bool isPlayerState = this.isPlayerState;
             UpdateExecutedCommandUI(newType, isPlayerState);
@@ -320,6 +316,12 @@ namespace Managers
                 case CommandType.Waiting_Action:
                     break;
             }
+        }
+
+        public bool CheckShowActionCardPanel(CommandType commandType)
+        {
+            bool isShow = isPlayerState && (commandType == CommandType.Action);
+            return isShow;
         }
 
         private void PlayerEndPhase()
@@ -401,30 +403,23 @@ namespace Managers
             return actionType == CommandType.End_Turn;
         }
 
-        private void StartCastSpell(SpellData spellData)
+        private void OnSelectSpell(SpellData spellData)
         {
-            currentSpellSelect = spellData;
-            SpellManager.Instance.GetCurrentUsedSpell(spellData);
-            spellData.StartCastSpell(this);
+            SpellManager.Instance.GetCurrentSpellSelected(spellData);
         }
 
-        private void OnUseSpell()
+        private void OnCastingSpell(Node node)
         {
-            currentSpellSelect.ExcuteSpell(this);
+            SpellManager.Instance.GetNodeMouseOn(node);
+            (List<Node> castNodes, List<Node> modifyNodes, Node startNode, Node endNode) = SpellManager.Instance.OnCastingSpell();
+            ShowActionRanges(castNodes, modifyNodes, startNode, endNode);
+        }
+
+        private void OnExecuteSpell()
+        {
+            SpellManager.Instance.OnExecuteSpell(this);
             BattlePhaseUIManager.Instance.OnUseCard(curentUsedCard);
-            currentSpellSelect = null;
             UpdateCommandType(CommandType.Waiting_Action);
-            ToggleModifiableState(false);
-        }
-
-        // public void ShowCastingRange(Node startNode, int castRange)
-        // {
-        //     movementCombatManager.ShowCastingRange(startNode, castRange);
-        // }
-
-        public void ToggleModifiableState(bool isModifiable)
-        {
-            inModifiableState = isModifiable;
         }
 
         public void ExecuteSpell(SpellData spellData)
@@ -435,13 +430,29 @@ namespace Managers
         public IEnumerator CorExecuteSpell(SpellData spellData)
         {
             yield return new WaitForSeconds(spellData.DurationEffect);
-            var enemy = currentNodeSelected.entityOnNode as EntityEnemy;
-            if (enemy != null)
+            var modifyNodes = movementCombatManager.ModifyNodes;
+            for (int i = 0; i < modifyNodes.Count; i++)
             {
-                Debug.LogError("Attack");
-                enemy.TakeDamage(spellData.ModifierData.ModifyValue);
-                var screenPos = GameHelper.WorldToScreenPoint(enemy.transform.position);
-                BattlePhaseUIManager.Instance.ShowModifyValue(spellData.ModifierData.ModifyValue, screenPos);
+                var character = modifyNodes[i].entityOnNode as CharacterEntity;
+                bool isValid = CheckIsValid(character, isPlayerState);
+                if (character != null && isValid)
+                {
+                    character.TakeDamage(spellData.ModifierData.ModifyValue);
+                    var screenPos = GameHelper.WorldToScreenPoint(character.transform.position);
+                    BattlePhaseUIManager.Instance.ShowModifyValue(spellData.ModifierData.ModifyValue, screenPos);
+                }
+            }
+        }
+
+        public bool CheckIsValid(Entity entity, bool isPlayer)
+        {
+            if (isPlayer)
+            {
+                return entity as EntityEnemy;
+            }
+            else
+            {
+                return entity as EntityPlayer;
             }
         }
 

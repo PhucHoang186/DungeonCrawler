@@ -12,7 +12,8 @@ namespace GameUI
 {
     public class ActionCardDisplay : MonoBehaviour, IPointerDownHandler
     {
-        [SerializeField] Outline toggleOutline;
+        public const string HIGHLIGHT = "Highlight";
+        public const string IDLE = "Idle";
         [Header("Value")]
         [Space(10)]
         [SerializeField] Image actionIcon;
@@ -26,6 +27,7 @@ namespace GameUI
         [Space(10)]
         [SerializeField] Image actionImage;
         [SerializeField] ActionValueDisplay actionValue;
+        [SerializeField] Animator anim;
 
         private SpellData spellData;
         private Action<ActionCardDisplay> OnSelectCardCb;
@@ -35,7 +37,7 @@ namespace GameUI
         {
             this.OnSelectCardCb = OnSelectCardCb;
             actionIcon.sprite = spellData.SpellIcon;
-            actionDescription.text = spellData.SpellDescription;
+            // actionDescription.text = spellData.SpellDescription;
 
             var modifyColorData = actionTypeColorConfig.GetMatchActionColorData(spellData.ModifierData.ModifyData.ModifyType);
             if (modifyColorData != null)
@@ -82,7 +84,7 @@ namespace GameUI
 
         public void ToggleSelected(bool isActive)
         {
-            toggleOutline.enabled = isActive;
+            anim?.Play(isActive ? HIGHLIGHT : IDLE);
             if (isActive)
             {
                 transform.DOShakeScale(0.3f, 0.2f);

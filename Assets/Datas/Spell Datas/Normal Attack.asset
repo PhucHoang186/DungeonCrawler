@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpellIcon: {fileID: 21300000, guid: 2b1603372ddf5bc48ace841bdf00d379, type: 3}
   SpellDescription: Some Useful Info
-  NeedTarget: 1
   CastRange: 1
   ModifyRange: 0
   ModifierData:
@@ -26,3 +25,5 @@ MonoBehaviour:
   EffectModifier:
     effectData: {fileID: 11400000, guid: 95fd440ec01dee74d8d4aeb221c8cf42, type: 2}
     Turn: 0
+  CastPattern: 0
+  NeedTarget: 1

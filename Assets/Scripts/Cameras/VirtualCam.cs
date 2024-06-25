@@ -74,6 +74,8 @@ namespace GameCamera
 
         private void SetNoise(float amplitude, float frequency)
         {
+            if (noise == null)
+                return;
             noise.m_AmplitudeGain = amplitude;
             noise.m_FrequencyGain = frequency;
         }

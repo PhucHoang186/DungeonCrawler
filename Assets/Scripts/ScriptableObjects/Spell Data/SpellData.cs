@@ -13,7 +13,6 @@ namespace Data
         public Sprite SpellIcon;
         public string SpellDescription = "Some useful info";
         [Header("Value")]
-        public bool NeedTarget = true;
         public int CastRange;
         public int ModifyRange;
         public ModifierData ModifierData;
@@ -21,8 +20,8 @@ namespace Data
         public EffectModifier EffectModifier;
         public float DurationEffect => EffectModifier.effectData.DurationEffect;
 
-        public abstract void StartCastSpell(BattleManager battleManager);
-        public abstract void CastingSpell(BattleManager battleManager);
+        // public abstract void StartCastSpell(BattleManager battleManager);
+        // public abstract void CastingSpell(BattleManager battleManager);
         public abstract void ExcuteSpell(BattleManager battleManager);
     }
 

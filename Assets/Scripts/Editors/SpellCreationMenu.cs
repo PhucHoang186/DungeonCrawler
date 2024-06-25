@@ -90,7 +90,6 @@ namespace EditorCustom
         {
             spellData.SpellIcon = spellIcon;
             spellData.SpellDescription = spellDescription;
-            spellData.NeedTarget = needTarget;
 
             spellData.CastRange = castRange;
             spellData.ModifyRange = ModifyRange;

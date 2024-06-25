@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Data;
 using EntityObject;
+using GameUI;
 using Map;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ namespace Managers
         private Node currentNodeOn;
         private SpellData currentUsedSpell;
         private EntityPlayer currentPlayerSelected;
+        private bool isExecutable;
+        public bool IsExecutable => isExecutable;
+        public Node CurrentNodeOn => currentNodeOn;
 
         void Awake()
         {
@@ -54,7 +58,7 @@ namespace Managers
             currentNodeOn = node;
         }
 
-        public void GetCurrentUsedSpell(SpellData spellData)
+        public void GetCurrentSpellSelected(SpellData spellData)
         {
             currentUsedSpell = spellData;
         }
@@ -62,20 +66,6 @@ namespace Managers
         public void GetCurrentPlayerSelected(EntityPlayer entityPlayer)
         {
             currentPlayerSelected = entityPlayer;
-        }
-
-        public void CastingSpell(MovementCombatManager movementCombatManager)
-        {
-            if (currentUsedSpell == null)
-                return;
-            // get cast range
-            AttackSpellData activeSpell = currentUsedSpell as AttackSpellData;
-            var castNodes = GetSpellRange(activeSpell, currentPlayerSelected.currentNode, activeSpell.CastRange);
-            movementCombatManager.ShowCastingRange(castNodes);
-
-            // get modify range
-            var modifyNodes = GetSpellRange(activeSpell, currentNodeOn, activeSpell.ModifyRange);
-            movementCombatManager.ShowModifyRange(currentPlayerSelected.currentNode, currentNodeOn, modifyNodes);
         }
 
         public List<Node> GetSpellRange(AttackSpellData activeSpell, Node startNode, int range)
@@ -88,6 +78,29 @@ namespace Managers
             {
                 return GridManager.Instance.GetStraightNodesWithStep(currentNodeOn, range, getEmptyOnly: false);
             }
+        }
+
+        public (List<Node> castNodes, List<Node> modifyNodes, Node startNode, Node endNode) OnCastingSpell()
+        {
+            if (currentUsedSpell == null)
+                return (null, null, null, null);
+
+            AttackSpellData activeSpell = currentUsedSpell as AttackSpellData;
+            isExecutable = activeSpell.CheckCastable(currentNodeOn);
+
+            // get cast range
+            var castNodes = GetSpellRange(activeSpell, currentPlayerSelected.currentNode, activeSpell.CastRange);
+
+            // get modify range
+            var modifyNodes = GetSpellRange(activeSpell, currentNodeOn, activeSpell.ModifyRange);
+
+            return (castNodes, modifyNodes, currentPlayerSelected.currentNode, currentNodeOn);
+        }
+
+        public void OnExecuteSpell(BattleManager battleManager)
+        {
+            currentUsedSpell.ExcuteSpell(battleManager);
+            currentUsedSpell = null;
         }
     }
 }

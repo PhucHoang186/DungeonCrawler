@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Data;
 using EntityObject;
 using Map;
 using UnityEngine;
@@ -23,6 +24,9 @@ namespace Managers
                     break;
                 case 2:
                     EnemyAction(enemy, gridManager, battleManager);
+                    break;
+                case 3:
+                    EnemyEndAction(battleManager);
                     break;
 
             }
@@ -61,12 +65,19 @@ namespace Managers
 
         private void EnemyAction(EntityEnemy enemy, GridManager gridManager, BattleManager battleManager)
         {
-            // temp
-            EnemyEndAction(battleManager);
-            UpdateActionOrder();
+            SpellData spellData = GetAction(enemy, gridManager, battleManager);
+            if (spellData)
+            {
+                battleManager.ExecuteSpell(spellData);
+                UpdateActionOrder();
+            }
+            else
+            {
+                EnemyEndAction(battleManager);
+            }
         }
 
-        private Node GetAction(EntityEnemy enemy, GridManager gridManager, BattleManager battleManager)
+        private SpellData GetAction(EntityEnemy enemy, GridManager gridManager, BattleManager battleManager)
         {
             return enemy.GetAction(gridManager, battleManager);
         }

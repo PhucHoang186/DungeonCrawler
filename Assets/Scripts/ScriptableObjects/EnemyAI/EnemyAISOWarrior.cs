@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Data;
 using EntityObject;
 using Managers;
 using Map;
@@ -12,20 +13,25 @@ namespace AIBehavior
     {
         #region Abstract Class
 
-        public override Node GetAction(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)
+        public override SpellData GetAction(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)
         {
             var castRange = battleManager.GetCastRange();
-
+            SpellData spellUsed = null;
             for (int i = 0; i < castRange.Count; i++)
             {
                 Entity entity = castRange[i].entityOnNode;
                 if (entity != null && entity is EntityPlayer)
                 {
                     // attack
+                    // temp
+                    var listSpells = enemy.EntityData.EquippedSpellList;
+                    listSpells.Shuffle();
+                    spellUsed = listSpells[0];
+                    break;
                 }
             }
 
-            return null;
+            return spellUsed;
         }
 
         public override Node GetMovement(GridManager gridManger, BattleManager battleManager, EntityEnemy enemy)

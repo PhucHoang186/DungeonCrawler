@@ -18,5 +18,6 @@ MonoBehaviour:
   MaxStamina: 10
   MaxMana: 1
   CharaterClass: 0
-  EquippedSpellList: []
+  EquippedSpellList:
+  - {fileID: 11400000, guid: 2671050860c294b4b912368141d033ce, type: 2}
   LearnedSpellList: []

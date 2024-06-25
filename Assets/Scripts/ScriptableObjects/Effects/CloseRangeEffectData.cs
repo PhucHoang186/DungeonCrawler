@@ -20,8 +20,8 @@ namespace Data
         {
             Entity player = battleManager.currentPlayer;
             effect = Instantiate(ExecuteEffect, player.transform);
-            effect.transform.rotation = Quaternion.LookRotation(battleManager.CurrentNodeSelected.transform.position - player.transform.position);
-            effect.transform.position = battleManager.CurrentNodeSelected.transform.position;
+            // effect.transform.rotation = Quaternion.LookRotation(battleManager.CurrentNodeSelected.transform.position - player.transform.position);
+            // effect.transform.position = battleManager.CurrentNodeSelected.transform.position;
         }
 
         public override void EndEffect(BattleManager battleManager)

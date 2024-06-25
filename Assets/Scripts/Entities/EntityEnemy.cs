@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using AIBehavior;
+using Data;
 using Managers;
 using Map;
 using UnityEngine;
@@ -17,9 +18,9 @@ namespace EntityObject
             return enemyAI.GetMovement(gridManger, battleManager, this);
         }
 
-        public virtual Node GetAction(GridManager gridManger, BattleManager battleManager)
+        public virtual SpellData GetAction(GridManager gridManger, BattleManager battleManager)
         {
-            return enemyAI.GetMovement(gridManger, battleManager, this);
+            return enemyAI.GetAction(gridManger, battleManager, this);
         }
     }
 }

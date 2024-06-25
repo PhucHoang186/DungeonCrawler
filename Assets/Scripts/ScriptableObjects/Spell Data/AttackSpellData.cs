@@ -9,29 +9,11 @@ using UnityEngine;
 namespace Data
 {
     [CreateAssetMenu(menuName = "Data/Spell/AttackSpell")]
-    public class AttackSpellData : SpellData
+    public class AttackSpellData : ActiveSpell
     {
-        public CastPattern CastPattern;
-
-        public override void CastingSpell(BattleManager battleManager)
-        {
-            var player = battleManager.currentPlayer;
-            Node currentNodeSelected = battleManager.CurrentNodeSelected;
-            if (NeedTarget)
-            {
-                // var castableNodes = battleManager.ShowModifyRange(player.currentNode, currentNodeSelected, ModifyRange);
-                // if (castableNodes == null)
-                    // return;
-
-                var enemies = battleManager.GetAllEnemies();
-                if (enemies.Contains(currentNodeSelected.entityOnNode as EntityEnemy))
-                {
-                    battleManager.ToggleModifiableState(true);
-                    return;
-                }
-            }
-            battleManager.ToggleModifiableState(false);
-        }
+        // public override void CastingSpell(BattleManager battleManager)
+        // {
+        // }
 
         public override void ExcuteSpell(BattleManager battleManager)
         {
@@ -47,13 +29,26 @@ namespace Data
             }
 
             battleManager.ExecuteSpell(this);
-
         }
 
-        public override void StartCastSpell(BattleManager battleManager)
+        // public override void StartCastSpell(BattleManager battleManager)
+        // {
+        //     var player = battleManager.currentPlayer;
+        //     // battleManager.ShowCastingRange(player.currentNode, CastRange);
+        // }
+
+        public override bool CheckCastable(Node node)
         {
-            var player = battleManager.currentPlayer;
-            // battleManager.ShowCastingRange(player.currentNode, CastRange);
+            if (NeedTarget)
+            {
+                bool isEnemyNode = node.entityOnNode is EntityEnemy;
+                return isEnemyNode;
+            }
+            else
+            {
+
+                return false;
+            }
         }
     }
 }
